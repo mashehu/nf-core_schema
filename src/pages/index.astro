@@ -1,0 +1,74 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SchemaForm from "../components/SchemaForm.svelte";
+import { Octokit } from "octokit";
+import { default as simpleschema } from "../../public/simple-schema.json";
+import { default as fetchngsschema } from "../../public/fetchngs-schema.json";
+import SchemaFormToc from "../components/SchemaFormToc.svelte";
+
+const pipeline = "rnaseq";
+const version = "dev";
+
+const octokit = new Octokit({});
+
+const schema = await octokit
+  .request("GET /repos/{owner}/{repo}/contents/{path}{?ref}", {
+    owner: "nf-core",
+    repo: pipeline,
+    path: `nextflow_schema.json`,
+    ref: version,
+  }) // parse file if found
+  .catch((error) => {
+    if (error.status === 404) {
+      console.log("Schema not found for " + pipeline + " " + version);
+      return { status: 404 };
+    } else {
+      throw error;
+    }
+  })
+  .then((response) => {
+    if (response.status === 200) {
+      return JSON.parse(Buffer.from(response.data.content, "base64").toString("utf-8"));
+    } else {
+      return { definitions: {} };
+    }
+  });
+let headings = [];
+if (schema.definitions && Object.keys(schema.definitions).length > 0) {
+  headings = Object.entries(schema.definitions).map(([key, value]) => {
+    return {
+      slug: key.replaceAll("_", "-"),
+      text: value.title,
+      depth: 1,
+      fa_icon: value.fa_icon,
+    };
+  });
+} else if (schema.properties && Object.keys(schema.properties).length > 0) {
+  schema.definitions = schema.properties; // catching the case where there is no definitions but only properties
+}
+---
+
+<Layout title="nf-core schema">
+  <div class="row">
+    <div class="col-12 col-md-10">
+      {
+        Object.keys(schema.definitions).length === 0 && (
+          <div class="alert alert-warning mt-3 " role="alert">
+            <h4 class="text-warning">No nextflow_schema.json file found!</h4>
+            <p>
+              It seems like there is no nextflow_schema.json file with parameters defined for this version of the
+              pipeline. Try a newer version.
+            </p>
+          </div>
+        )
+      }
+
+      <SchemaForm {schema} client:load />
+    </div>
+    <div class="col-12 col-md-2 toc order-first order-md-last pe-0">
+      <SchemaFormToc headings={headings} client:idle />
+    </div>
+  </div>
+</Layout>
+
+<style></style>

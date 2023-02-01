@@ -1,0 +1,33 @@
+---
+export interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body>
+		<div class="container">
+		<slot />
+		</div>
+	</body>
+</html>
+<style lang="scss" is:global>
+
+	$success: #28a745;
+	$headings-color: $success;
+	$component-active-color: $success;
+	@import 'bootstrap/scss/bootstrap.scss';
+	@import '@fortawesome/fontawesome-free/scss/fontawesome.scss';
+	
+		
+</style>
