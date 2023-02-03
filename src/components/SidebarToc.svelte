@@ -37,15 +37,16 @@
                 {/each}
             </ul>
             <div class="">
-                <a
-                    href="#/"
-                    class="back-to-top text-muted text-small float-end mb-2"
-                    on:click={() => window.scrollTo(0, 0)}
-                >
-                    <i class="fa-solid fa-arrow-up-to-line" aria-hidden="true" /> Back to top
-                </a>
+               
 
                 <slot />
+                 <a
+                    href="#/"
+                    class="back-to-top text-muted text-small float-end mt-1"
+                    on:click={() => window.scrollTo(0, 0)}
+                >
+                    <i class="fa fa-arrow-up" aria-hidden="true" /> Back to top
+                </a>
             </div>
         </nav>
     </div>

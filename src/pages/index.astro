@@ -2,10 +2,9 @@
 import Layout from "../layouts/Layout.astro";
 import SchemaForm from "../components/SchemaForm.svelte";
 import { Octokit } from "octokit";
-import { default as simpleschema } from "../../public/simple-schema.json";
-import { default as fetchngsschema } from "../../public/fetchngs-schema.json";
 import SchemaFormToc from "../components/SchemaFormToc.svelte";
 
+// TODO: make these dynamic
 const pipeline = "rnaseq";
 const version = "dev";
 
@@ -33,19 +32,20 @@ const schema = await octokit
       return { definitions: {} };
     }
   });
-let headings = [];
+let headings: { slug: string; text: string; depth: number; fa_icon?: string }[] = [];
 if (schema.definitions && Object.keys(schema.definitions).length > 0) {
   headings = Object.entries(schema.definitions).map(([key, value]) => {
     return {
       slug: key.replaceAll("_", "-"),
       text: value.title,
       depth: 1,
-      fa_icon: value.fa_icon,
+      fa_icon: value.fa_icon.replace("fas ", "fa "),
     };
   });
 } else if (schema.properties && Object.keys(schema.properties).length > 0) {
-  schema.definitions = schema.properties; // catching the case where there is no definitions but only properties
+  schema.definitions = schema.properties; // catching old-formats of the schema, where there is no definitions but only properties
 }
+
 ---
 
 <Layout title="nf-core schema">
